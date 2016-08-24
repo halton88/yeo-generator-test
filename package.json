@@ -1,0 +1,26 @@
+{
+  "name": "generator-analysistools",
+  "version": "1.0.0",
+  "description": "Base project templates for analysis tool apps",
+  "main": "index.js",
+  "dependencies": {
+    "lodash": "^4.15.0",
+    "path": "^0.12.7",
+    "sanitize-filename": "^1.6.0",
+    "yeoman-generator": "^0.24.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "generators/angular",
+    "generators/backbone",
+    "generators/static"
+  ],
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "author": "",
+  "license": "ISC"
+}
