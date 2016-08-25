@@ -3,15 +3,11 @@ var sanitize = require('sanitize-filename');
 var path = require('path');
 var _ = require('lodash');
 
-var Base = generators.Base;
-module.exports = Base.extend({
+module.exports = generators.Base.extend({
     constructor: function () {
         generators.Base.apply(this, arguments);
     },
-    configuring: function () {
-        this.config.save();
-    },
-    initializing: function () {
+    prompting: function () {
         this.defaults = {
             title: 'New Application Name',
             version: '0.0.1',
@@ -21,8 +17,6 @@ module.exports = Base.extend({
             scriptName: "tools-base",
             framework: 'static'
         };
-    },
-    prompting: function () {
         this.prompt(
             [
                 {
@@ -101,56 +95,36 @@ module.exports = Base.extend({
                     message: 'Continue?'
         }
             ],
-            this.validate.bind(this));
-    },
-    writing: function () {
-        this.log("In 'writing' function");
-//        this.log(this.args.framework);
-//        this.log("------------------------------");
-//        this.log(this);
-//        this.log("------------------------------");
+            function (answers) {
+                $this = this;
+                var done = $this.async();
+                this.log("In 'validate' function \n");
+                if (err) {
+                    return this.emit('error', err);
+                } else {
+                    extScripts = [];
+                    extScripts.push('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>');
 
-        if (this.args.length > 0) {
-            var files = [
-            path.join('..', 'test', '**', '*'),
-            path.join(__dirname + 'app', this.args.framework.value, '**', '*')
-        ];
+                    if (answers.bootstrap)
+                        answers.extScripts.push('<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>');
 
-            this.log(files);
-
-            function processTemplates(sourcePath) {
-                this.log(sourcePath);
-                this.fs.copyTpl(
-                    this.templatePath(sourcePath),
-                    this.destinationPath(sourcePath),
-                    this.args);
-            }
-
-            _.each(files, processTemplates);
-        }
-    },
-    end: function () {
-        this.log("In 'end' function");
-    },
-    validate: function (err, props) {
-        this.log("In 'validate' function");
-        if (err) {
-            return this.emit('error', err);
-        } else {
-            if (props) {
-                var done = this.async();
-                extScripts = [];
-                extScripts.push('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>');
-
-                if (answers.bootstrap)
-                    answers.extScripts.push('<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>');
-
-                props.appName = _.slugify(this.toolTitle.toLowerCase());
-                props.extScripts = this.extScripts.join();
-                props.extStyles = this.extStyles.join();
-
+                    
+                    this.appname = _.slugify(answers.toolTitle.toLowerCase());
+                    this.extScripts = answers.extScripts.join();
+                    this.extStyles = answers.extStyles.join();
+                    this.args = answers;
+                }
                 done();
-            }
+            }.bind(this));
+    },
+    writing: {
+        testCopy: function () {
+            this.fs.copy(this.template('test/**/*','./'));
+        },
+        appCopy: function () {
+            this.log(this);
+            if (this.args.framework)
+                this.fs.copyTpl(this.template(this.args.framework.value + 'app/**/*', './'));
         }
     }
 });
